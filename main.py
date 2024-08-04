@@ -9,18 +9,17 @@ class ObjectCropper:
 
     def _pre_process_image(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        return blurred
+        return gray
 
     def _threshold_image(self, preprocessed_image):
         _, result = cv2.threshold(
-            preprocessed_image, 100, 255, cv2.THRESH_BINARY_INV)
+            preprocessed_image, 85, 255, cv2.THRESH_BINARY_INV)
         return result
 
     def _apply_morphological_operations(self, thresh):
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        morphed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-        morphed = cv2.morphologyEx(morphed, cv2.MORPH_OPEN, kernel)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
+        erode = cv2.dilate(thresh, kernel, iterations=1)
+        morphed = cv2.morphologyEx(erode, cv2.MORPH_ERODE, kernel)
         return morphed
 
     def _find_largest_contour(self, morphed_image):
